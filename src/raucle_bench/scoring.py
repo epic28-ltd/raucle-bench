@@ -126,6 +126,37 @@ def _percentile(values: list[float], pct: float) -> float:
     return s[f] + (s[c] - s[f]) * (k - f)
 
 
+def _tally(
+    records: list[RunRecord],
+) -> tuple[int, int, int, int, int, int, list[float]]:
+    """Count TP/FP/TN/FN, strict matches, errors and latencies in one pass."""
+    tp = fp = tn = fn = 0
+    strict_matches = 0
+    errors = 0
+    latencies: list[float] = []
+
+    for rec in records:
+        latencies.append(rec.latency_ms)
+        if rec.error:
+            errors += 1
+        is_attack = rec.attack_class != "benign"
+        predicted_positive = _is_positive(rec.predicted_action)
+
+        if is_attack and predicted_positive:
+            tp += 1
+        elif not is_attack and predicted_positive:
+            fp += 1
+        elif not is_attack and not predicted_positive:
+            tn += 1
+        else:  # is_attack and not predicted_positive
+            fn += 1
+
+        if rec.predicted_action == rec.expected_action:
+            strict_matches += 1
+
+    return tp, fp, tn, fn, strict_matches, errors, latencies
+
+
 def score(result: RunResult) -> Score:
     """Compute precision / recall / latency etc. for one adapter run."""
     records = result.records
@@ -153,29 +184,7 @@ def score(result: RunResult) -> Score:
             setup_failed=result.setup_failed,
         )
 
-    tp = fp = tn = fn = 0
-    strict_matches = 0
-    errors = 0
-    latencies: list[float] = []
-
-    for rec in records:
-        latencies.append(rec.latency_ms)
-        if rec.error:
-            errors += 1
-        is_attack = rec.attack_class != "benign"
-        predicted_positive = _is_positive(rec.predicted_action)
-
-        if is_attack and predicted_positive:
-            tp += 1
-        elif not is_attack and predicted_positive:
-            fp += 1
-        elif not is_attack and not predicted_positive:
-            tn += 1
-        else:  # is_attack and not predicted_positive
-            fn += 1
-
-        if rec.predicted_action == rec.expected_action:
-            strict_matches += 1
+    tp, fp, tn, fn, strict_matches, errors, latencies = _tally(records)
 
     precision = _safe_div(tp, tp + fp)
     recall = _safe_div(tp, tp + fn)
