@@ -109,6 +109,26 @@ def _publish_run_id(run_id: str) -> str:
     return run_id
 
 
+def _run_adapters(adapter_names: list[str], prompts: list) -> list:
+    """Run every selected adapter on the prompts, returning their scores."""
+    scores = []
+    for name in adapter_names:
+        adapter = ADAPTERS[name]()
+        print(f"Running {name}...", file=sys.stderr, end=" ", flush=True)
+        result = run_adapter(adapter, prompts)
+        s = score(result)
+        if s.setup_failed:
+            print(f"SETUP FAILED ({s.setup_failed})", file=sys.stderr)
+        else:
+            print(
+                f"F1={s.f1:.3f} detection={s.detection_rate:.1%} "
+                f"FPR={s.false_positive_rate:.1%} p50={s.latency_p50_ms:.2f}ms",
+                file=sys.stderr,
+            )
+        scores.append(s)
+    return scores
+
+
 def main(argv: list[str] | None = None) -> int:
     _register_optional_adapters()
     parser = _build_parser()
@@ -143,21 +163,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Available: {sorted(ADAPTERS)}", file=sys.stderr)
         return 1
 
-    scores = []
-    for name in adapter_names:
-        adapter = ADAPTERS[name]()
-        print(f"Running {name}...", file=sys.stderr, end=" ", flush=True)
-        result = run_adapter(adapter, prompts)
-        s = score(result)
-        if s.setup_failed:
-            print(f"SETUP FAILED ({s.setup_failed})", file=sys.stderr)
-        else:
-            print(
-                f"F1={s.f1:.3f} detection={s.detection_rate:.1%} "
-                f"FPR={s.false_positive_rate:.1%} p50={s.latency_p50_ms:.2f}ms",
-                file=sys.stderr,
-            )
-        scores.append(s)
+    scores = _run_adapters(adapter_names, prompts)
 
     run_id = args.run_id or dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
     try:
