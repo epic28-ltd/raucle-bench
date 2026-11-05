@@ -96,6 +96,7 @@ See [`datasets/README.md`](datasets/README.md) for the schema, source labelling,
 # src/raucle_bench/adapters/my_tool.py
 from raucle_bench.adapter import Prediction
 
+
 class MyToolAdapter:
     name = "my-tool-v1"
     version = "0.1.0"
