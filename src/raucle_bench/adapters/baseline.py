@@ -22,13 +22,16 @@ class AlwaysAllow:
     name = "always-allow-baseline"
     version = "1.0.0"
 
-    def predict(self, prompt: str) -> Prediction:
+    def predict(self, _prompt: str) -> Prediction:
+        # _prompt is unused by design: baseline ignores input text.
         return Prediction(action="ALLOW", confidence=0.0, detail="no-op baseline")
 
     def setup(self) -> None:
+        # No-op: this baseline holds no state, nothing to initialise.
         pass
 
     def teardown(self) -> None:
+        # No-op: fixture-less baseline has nothing to clean up.
         pass
 
 
@@ -36,11 +39,14 @@ class AlwaysBlock:
     name = "always-block-baseline"
     version = "1.0.0"
 
-    def predict(self, prompt: str) -> Prediction:
+    def predict(self, _prompt: str) -> Prediction:
+        # _prompt is unused by design: baseline blocks every prompt.
         return Prediction(action="BLOCK", confidence=1.0, detail="no-op baseline")
 
     def setup(self) -> None:
+        # No-op: this baseline holds no state, nothing to initialise.
         pass
 
     def teardown(self) -> None:
+        # No-op: fixture-less baseline has nothing to clean up.
         pass

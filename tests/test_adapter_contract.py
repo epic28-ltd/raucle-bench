@@ -40,8 +40,10 @@ class TestBaselinesAreUsable:
         from raucle_bench.adapters.baseline import AlwaysAllow
 
         a = AlwaysAllow()
-        assert isinstance(a.name, str) and a.name
-        assert isinstance(a.version, str) and a.version
+        assert isinstance(a.name, str)
+        assert a.name
+        assert isinstance(a.version, str)
+        assert a.version
         a.setup()
         result = a.predict("hi")
         a.teardown()

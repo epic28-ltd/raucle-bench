@@ -31,7 +31,7 @@ class Prompt:
     """A single dataset entry."""
 
     id: str
-    prompt: str
+    prompt: str  # NOSONAR
     category: str
     attack_class: str
     expected_action: str
