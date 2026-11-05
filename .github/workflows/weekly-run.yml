@@ -6,22 +6,25 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   benchmark:
     runs-on: ubuntu-latest
+    # contents: write is required to commit the refreshed leaderboard back
+    # to main; nothing else is elevated.
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - uses: astral-sh/setup-uv@0a73d6eb01c0201c8fc84847d0f4425b704ad66d
       - name: Install with raucle-detect
-        run: pip install -e '.[raucle,llm-guard]'
+        run: uv sync --locked --extra raucle --extra llm-guard
       - name: Run benchmark
-        run: raucle-bench
+        run: uv run raucle-bench
       - name: Commit results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

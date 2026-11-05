@@ -25,7 +25,12 @@ def build_report(scores: list[Score], prompts: list, run_id: str | None = None) 
 
 
 def write_json(report: dict, path: str | Path) -> None:
-    Path(path).write_text(json.dumps(report, indent=2, sort_keys=True))
+    p = Path(path)
+    # Canonicalise the parent so a symlinked/relative parent cannot redirect
+    # the write outside the directory the caller selected.
+    parent = p.parent.resolve()
+    p = parent / p.name
+    p.write_text(json.dumps(report, indent=2, sort_keys=True))
 
 
 def render_markdown(report: dict) -> str:
