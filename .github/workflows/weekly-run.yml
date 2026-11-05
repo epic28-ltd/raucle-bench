@@ -22,9 +22,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: astral-sh/setup-uv@0a73d6eb01c0201c8fc84847d0f4425b704ad66d
       - name: Install with raucle-detect
-        run: uv sync --locked --extra raucle --extra llm-guard
+        run: uv sync --locked --no-build --no-build-package fuzzysearch --extra raucle --extra llm-guard
       - name: Run benchmark
-        run: uv run raucle-bench
+        run: uv run --locked --no-build raucle-bench
       - name: Commit results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

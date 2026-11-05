@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v4
       - uses: astral-sh/setup-uv@0a73d6eb01c0201c8fc84847d0f4425b704ad66d
       - run: uv build
-      - run: uvx twine check dist/*
+      - run: uvx --no-build twine==6.1.0 check dist/*
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v4
         with:
           name: dist

@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v4
       - uses: astral-sh/setup-uv@0a73d6eb01c0201c8fc84847d0f4425b704ad66d
-      - run: uv sync --locked --extra dev
-      - run: uv run ruff check src/ tests/
-      - run: uv run ruff format --check src/ tests/
-      - run: uv run pytest -q
+      - run: uv sync --locked --no-build --extra dev
+      - run: uv run --locked --no-build ruff check src/ tests/
+      - run: uv run --locked --no-build ruff format --check src/ tests/
+      - run: uv run --locked --no-build pytest -q
