@@ -15,7 +15,9 @@ jobs:
     # contents: write is required to commit the refreshed leaderboard back
     # to main; nothing else is elevated.
     permissions:
+      content: write
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v4
         with:
@@ -31,7 +33,7 @@ jobs:
         run: uv run --locked --no-build raucle-bench
       - name: Commit results
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "raucle-bench-bot"
           git config user.email "oss@raucle.io"
@@ -39,6 +41,12 @@ jobs:
             echo "No leaderboard changes."
             exit 0
           fi
+          BRANCH="weekly/leaderboard-$(date -u +%Y-%m-%d)-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
           git add results/
-          git commit -m "Weekly leaderboard run $(date -u +%Y-%m-%d)"
-          git push origin HEAD:main
+          git commit -s -m "Weekly leaderboard run $(date -u +%Y-%m-%d)"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "Weekly leaderboard run $(date -u +%Y-%m-%d)" \
+            --body "Automated refresh from scheduled run ${{ github.run_id }}. Merges when the required checks pass."
+          gh pr merge --squash --auto
