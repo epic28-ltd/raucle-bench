@@ -15,7 +15,6 @@ jobs:
     # contents: write is required to commit the refreshed leaderboard back
     # to main; nothing else is elevated.
     permissions:
-      content: write
       contents: write
       pull-requests: write
     steps:
