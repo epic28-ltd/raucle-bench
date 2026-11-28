@@ -45,7 +45,14 @@ jobs:
           git add results/
           git commit -s -m "Weekly leaderboard run $(date -u +%Y-%m-%d)"
           git push origin "HEAD:refs/heads/$BRANCH"
-          gh pr create --base main --head "$BRANCH" \
+          # GitHub Actions needs the org setting "Allow GitHub Actions to
+          # create and approve pull requests" for gh pr create to succeed.
+          # Without it the run still publishes the dated branch; the pull
+          # request is then opened by a maintainer on the next review pass.
+          if ! gh pr create --base main --head "$BRANCH" \
             --title "Weekly leaderboard run $(date -u +%Y-%m-%d)" \
-            --body "Automated refresh from scheduled run ${{ github.run_id }}. Merges when the required checks pass."
-          gh pr merge --squash --auto
+            --body "Automated refresh from scheduled run ${{ github.run_id }}. Merges when the required checks pass."; then
+            echo "PR creation not permitted for GITHUB_TOKEN: branch $BRANCH is published; a maintainer opens the pull request."
+          else
+            gh pr merge --squash --auto
+          fi
